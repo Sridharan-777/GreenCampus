@@ -23,3 +23,8 @@ media/
 *.swp
 *.swo
 .DS_Store
+
+# Private credentials
+*credentials*.txt
+user_credentials.txt
+

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Eco-Rewards Store - GreenCampus{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+  <div>
+    <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary-400); text-transform: uppercase;">Gamified Rewards</div>
+    <h1 style="font-size: 2.2rem; margin-top: 4px;">Eco-Rewards Store</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Exchange your hard-earned Eco-Points for real campus vouchers, green merchandise & certificates</p>
+  </div>
+  
+  {% if user.is_authenticated %}
+    <div class="user-points-pill" style="font-size: 1rem; padding: 10px 20px;">
+      <i class="fa-solid fa-seedling"></i>
+      <span>Your Balance: <strong>{{ user.profile.eco_points }} pts</strong></span>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Rewards Catalog Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; margin-bottom: 40px;">
+  {% for reward in rewards %}
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--primary-500);">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: center; color: var(--primary-400); font-size: 1.4rem;">
+            <i class="fa-solid {{ reward.icon }}"></i>
+          </div>
+          <span class="badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); font-size: 0.85rem;">
+            {{ reward.points_cost }} Points
+          </span>
+        </div>
+
+        <h3 style="font-size: 1.2rem; margin-bottom: 8px;">{{ reward.title }}</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 14px;">
+          {{ reward.description }}
+        </p>
+
+        <div style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 20px;">
+          Sponsored by: <strong style="color: var(--text-muted);">{{ reward.sponsor }}</strong> • Stock: {{ reward.available_stock }} left
+        </div>
+      </div>
+
+      <div>
+        {% if user.is_authenticated %}
+          {% if user.profile.eco_points >= reward.points_cost %}
+            <form method="POST" action="{% url 'redeem_reward' reward.pk %}" onsubmit="return confirm('Redeem {{ reward.title }} for {{ reward.points_cost }} Eco-Points?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <i class="fa-solid fa-gift"></i> Redeem for {{ reward.points_cost }} pts
+              </button>
+            </form>
+          {% else %}
+            <button class="btn btn-secondary" style="width: 100%; opacity: 0.6; cursor: not-allowed;" disabled>
+              <i class="fa-solid fa-lock"></i> Need {{ reward.points_cost }} pts ({{ user.profile.eco_points }} pts)
+            </button>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-secondary" style="width: 100%;">
+            Log in to Redeem
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <p style="color: var(--text-muted); text-align: center; grid-column: 1 / -1;">No rewards available currently.</p>
+  {% endfor %}
+</div>
+
+<!-- User's Claimed Vouchers -->
+{% if user.is_authenticated and user_redemptions %}
+  <div class="card">
+    <div class="card-header">
+      <h3 style="font-size: 1.25rem;"><i class="fa-solid fa-ticket" style="color: var(--primary-400); margin-right: 8px;"></i> My Claimed Reward Vouchers</h3>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+      {% for redemption in user_redemptions %}
+        <div style="background: rgba(11, 19, 21, 0.7); border: 1px dashed var(--primary-500); border-radius: var(--radius-md); padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <strong style="color: #fff; font-size: 1rem;">{{ redemption.reward.title }}</strong>
+            <span class="badge badge-cleaned">{{ redemption.points_spent }} pts</span>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+            Claimed on {{ redemption.created_at|date:"M d, Y" }}
+          </div>
+
+          <div style="background: rgba(16, 185, 129, 0.15); border-radius: var(--radius-sm); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+            <code style="font-family: monospace; font-weight: 800; font-size: 1rem; color: var(--primary-300); letter-spacing: 0.05em;">{{ redemption.redemption_code }}</code>
+            <button type="button" class="btn btn-secondary btn-sm btn-copy-code" data-code="{{ redemption.redemption_code }}">
+              <i class="fa-solid fa-copy"></i> Copy
+            </button>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-dim); margin-top: 8px; margin-bottom: 0;">Show this coupon code at campus cafeteria or eco-counter.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

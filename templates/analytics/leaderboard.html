@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block title %}Eco Leaderboard & Hall of Fame - GreenCampus{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 36px;">
+  <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-amber); text-transform: uppercase;">Gamification & Recognition</div>
+  <h1 style="font-size: 2.4rem; margin: 4px 0 10px 0;">University Eco Champions Leaderboard</h1>
+  <p style="color: var(--text-muted); font-size: 1rem; max-width: 600px; margin: 0 auto;">
+    Top students, hostels, and academic departments driving campus sustainability through waste reporting and cleanups.
+  </p>
+</div>
+
+<!-- Top 3 Podium Cards -->
+{% if top_three %}
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-bottom: 40px; align-items: end;">
+    
+    <!-- 2nd Place (Silver) -->
+    {% if top_three|length >= 2 %}
+      {% with silver=top_three.1 %}
+        <div class="card" style="text-align: center; border: 1px solid rgba(148, 163, 184, 0.4); background: linear-gradient(180deg, rgba(30, 41, 59, 0.8), rgba(17, 30, 33, 0.95)); order: 1;">
+          <div style="font-size: 2.2rem; color: #cbd5e1; margin-bottom: 8px;">🥈</div>
+          <span class="badge" style="background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.4); margin-bottom: 12px;">Rank #2</span>
+          
+          <div style="width: 70px; height: 70px; border-radius: 50%; background: #334155; margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #fff; border: 2px solid #cbd5e1;">
+            {{ silver.user.username|first|upper }}
+          </div>
+          
+          <h3 style="font-size: 1.2rem; margin-bottom: 4px;">{{ silver.user.get_full_name|default:silver.user.username }}</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">{{ silver.department|default:"Student" }}</p>
+          
+          <div class="badge badge-cleaned" style="font-size: 0.9rem; padding: 6px 14px;">
+            {{ silver.eco_points }} pts
+          </div>
+        </div>
+      {% endwith %}
+    {% endif %}
+
+    <!-- 1st Place (Gold) -->
+    {% if top_three|length >= 1 %}
+      {% with gold=top_three.0 %}
+        <div class="card" style="text-align: center; border: 2px solid rgba(251, 191, 36, 0.6); background: linear-gradient(180deg, rgba(78, 59, 10, 0.4), rgba(17, 30, 33, 0.95)); order: 0; box-shadow: 0 0 30px rgba(251, 191, 36, 0.2); transform: scale(1.04);">
+          <div style="font-size: 2.8rem; color: #fbbf24; margin-bottom: 8px;">👑</div>
+          <span class="badge" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.5); margin-bottom: 12px;">Rank #1 Champion</span>
+          
+          <div style="width: 84px; height: 84px; border-radius: 50%; background: linear-gradient(135deg, #d97706, #fbbf24); margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: #fff; border: 3px solid #fef08a;">
+            {{ gold.user.username|first|upper }}
+          </div>
+          
+          <h3 style="font-size: 1.35rem; margin-bottom: 4px;">{{ gold.user.get_full_name|default:gold.user.username }}</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">{{ gold.department|default:"Campus Leader" }}</p>
+          
+          <div class="badge badge-cleaned" style="font-size: 1rem; padding: 8px 18px; background: rgba(251, 191, 36, 0.2); color: #fbbf24; border-color: rgba(251, 191, 36, 0.4);">
+            {{ gold.eco_points }} pts
+          </div>
+        </div>
+      {% endwith %}
+    {% endif %}
+
+    <!-- 3rd Place (Bronze) -->
+    {% if top_three|length >= 3 %}
+      {% with bronze=top_three.2 %}
+        <div class="card" style="text-align: center; border: 1px solid rgba(217, 119, 6, 0.4); background: linear-gradient(180deg, rgba(45, 25, 10, 0.6), rgba(17, 30, 33, 0.95)); order: 2;">
+          <div style="font-size: 2.2rem; color: #d97706; margin-bottom: 8px;">🥉</div>
+          <span class="badge" style="background: rgba(217, 119, 6, 0.2); color: #fb923c; border: 1px solid rgba(217, 119, 6, 0.4); margin-bottom: 12px;">Rank #3</span>
+          
+          <div style="width: 70px; height: 70px; border-radius: 50%; background: #451a03; margin: 0 auto 12px auto; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #fff; border: 2px solid #fb923c;">
+            {{ bronze.user.username|first|upper }}
+          </div>
+          
+          <h3 style="font-size: 1.2rem; margin-bottom: 4px;">{{ bronze.user.get_full_name|default:bronze.user.username }}</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">{{ bronze.department|default:"Student" }}</p>
+          
+          <div class="badge badge-cleaned" style="font-size: 0.9rem; padding: 6px 14px;">
+            {{ bronze.eco_points }} pts
+          </div>
+        </div>
+      {% endwith %}
+    {% endif %}
+
+  </div>
+{% endif %}
+
+<!-- Full Rankings Table & Department Standings -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px;">
+  
+  <!-- Individual Standings -->
+  <div class="card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+      <h3 style="font-size: 1.2rem;"><i class="fa-solid fa-ranking-star" style="color: var(--primary-400); margin-right: 8px;"></i> Overall Individual Rankings</h3>
+      <span style="font-size: 0.85rem; color: var(--text-muted);">Points updated live</span>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+      <thead>
+        <tr style="background: rgba(11, 19, 21, 0.6); border-bottom: 1px solid var(--border-subtle); font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">
+          <th style="padding: 14px 20px;">Rank</th>
+          <th style="padding: 14px 20px;">Student Champion</th>
+          <th style="padding: 14px 20px;">Department</th>
+          <th style="padding: 14px 20px;">Level Badge</th>
+          <th style="padding: 14px 20px; text-align: right;">Total Eco-Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rank in other_ranks %}
+          <tr style="border-bottom: 1px solid var(--border-subtle);">
+            <td style="padding: 14px 20px; font-weight: 700; color: var(--text-dim);">#{{ forloop.counter|add:3 }}</td>
+            <td style="padding: 14px 20px;">
+              <strong style="color: #fff;"><a href="{% url 'user_profile' rank.user.username %}">@{{ rank.user.username }}</a></strong>
+            </td>
+            <td style="padding: 14px 20px; color: var(--text-muted); font-size: 0.9rem;">{{ rank.department|default:"Campus" }}</td>
+            <td style="padding: 14px 20px;">
+              <span class="badge badge-cleaned" style="font-size: 0.75rem;">{{ rank.level }}</span>
+            </td>
+            <td style="padding: 14px 20px; text-align: right; font-weight: 800; color: var(--primary-300);">
+              {{ rank.eco_points }} pts
+            </td>
+          </tr>
+        {% empty %}
+          {% if not top_three %}
+            <tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted);">No student rankings available yet.</td></tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Department & Hostel Standings -->
+  <div style="display: flex; flex-direction: column; gap: 24px;">
+    
+    <!-- Department Standings -->
+    <div class="card">
+      <h3 style="font-size: 1.15rem; margin-bottom: 16px;"><i class="fa-solid fa-building-columns" style="color: var(--accent-cyan); margin-right: 8px;"></i> Department Standings</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for dept in dept_standings %}
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(11, 19, 21, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+            <div>
+              <strong style="color: #fff; font-size: 0.95rem;">{{ dept.department }}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">{{ dept.member_count }} active champions</div>
+            </div>
+            <span class="badge" style="background: rgba(6, 182, 212, 0.2); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3);">
+              {{ dept.total_points }} pts
+            </span>
+          </div>
+        {% empty %}
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Department data will appear as profiles are created.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Campus Eco-Badges Catalog -->
+    <div class="card">
+      <h3 style="font-size: 1.15rem; margin-bottom: 16px;"><i class="fa-solid fa-award" style="color: var(--accent-amber); margin-right: 8px;"></i> Unlockable Eco-Badges</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        {% for badge in all_badges %}
+          <div style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; background: rgba(11, 19, 21, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+            <div style="width: 36px; height: 36px; border-radius: 8px; background: {{ badge.badge_color }}22; border: 1px solid {{ badge.badge_color }}55; display: flex; align-items: center; justify-content: center; color: {{ badge.badge_color }}; font-size: 1.1rem;">
+              <i class="fa-solid {{ badge.icon }}"></i>
+            </div>
+            <div style="flex: 1;">
+              <strong style="color: #fff; font-size: 0.9rem;">{{ badge.name }}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">{{ badge.description }}</div>
+            </div>
+            <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary-400);">{{ badge.points_required }} pts</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

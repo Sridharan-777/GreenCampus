@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Organize Campaign - GreenCampus{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 0 auto;">
+  
+  <div style="margin-bottom: 24px;">
+    <a href="{% url 'event_list' %}" style="color: var(--text-muted); font-size: 0.9rem;">
+      <i class="fa-solid fa-arrow-left"></i> Back to Campaigns
+    </a>
+    <h1 style="font-size: 2rem; margin-top: 8px;">Organize a Campus Eco-Campaign</h1>
+    <p style="color: var(--text-muted);">Mobilize students for clean-up drives, recycling rallies, and green workshops</p>
+  </div>
+
+  <div class="card" style="box-shadow: var(--shadow-lg);">
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {% if form.errors %}
+        <div class="alert alert-error">
+          Please check the fields below for any errors.
+        </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label class="form-label">Campaign Title *</label>
+        {{ form.title }}
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label">Campaign Category *</label>
+          {{ form.category }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location / Meeting Point *</label>
+          {{ form.location }}
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label">Start Date & Time *</label>
+          {{ form.start_date }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Date & Time *</label>
+          {{ form.end_date }}
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label">Target Volunteers</label>
+          {{ form.target_volunteers }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Eco-Points Reward</label>
+          {{ form.eco_points_reward }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Campaign Banner Image</label>
+        {{ form.banner_image }}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mission & Agenda Details *</label>
+        {{ form.description }}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+        <i class="fa-solid fa-bullhorn"></i> Launch Green Campaign
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

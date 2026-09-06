@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Submit Waste Report - GreenCampus{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 0 auto;">
+  
+  <div style="margin-bottom: 24px;">
+    <a href="{% url 'report_list' %}" style="color: var(--text-muted); font-size: 0.9rem;">
+      <i class="fa-solid fa-arrow-left"></i> Back to Waste Reports
+    </a>
+    <h1 style="font-size: 2rem; margin-top: 8px;">Report Campus Waste</h1>
+    <p style="color: var(--text-muted);">Snap a picture, tag the location, and alert university maintenance & green marshals</p>
+  </div>
+
+  <div class="card" style="box-shadow: var(--shadow-lg);">
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      {% if form.errors %}
+        <div class="alert alert-error">
+          Please correct the errors in the fields below.
+        </div>
+      {% endif %}
+
+      <!-- Report Title -->
+      <div class="form-group">
+        <label class="form-label" for="{{ form.title.id_for_label }}">Report Title *</label>
+        {{ form.title }}
+      </div>
+
+      <!-- Category & Urgency -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label" for="{{ form.category.id_for_label }}">Waste Category *</label>
+          {{ form.category }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="{{ form.urgency.id_for_label }}">Urgency Level *</label>
+          {{ form.urgency }}
+        </div>
+      </div>
+
+      <!-- Location & Estimated Weight -->
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label" for="{{ form.location_name.id_for_label }}">Campus Location / Zone *</label>
+          {{ form.location_name }}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="{{ form.estimated_weight_kg.id_for_label }}">Est. Weight (kg)</label>
+          {{ form.estimated_weight_kg }}
+        </div>
+      </div>
+
+      <!-- Photo Upload with Live Preview Box -->
+      <div class="form-group">
+        <label class="form-label" for="{{ form.image.id_for_label }}">
+          <i class="fa-solid fa-camera" style="color: var(--primary-400); margin-right: 6px;"></i> Photo Evidence *
+        </label>
+        {{ form.image }}
+        
+        <div id="image-preview-container" style="display: none; margin-top: 14px; text-align: center; background: rgba(11, 19, 21, 0.8); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-card);">
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">Photo Preview:</div>
+          <img id="image-preview" src="#" alt="Upload Preview" style="max-height: 220px; max-width: 100%; border-radius: var(--radius-sm); object-fit: contain;">
+        </div>
+      </div>
+
+      <!-- Description Context -->
+      <div class="form-group">
+        <label class="form-label" for="{{ form.description.id_for_label }}">Additional Details / Landmark</label>
+        {{ form.description }}
+      </div>
+
+      <!-- Eco Points info alert -->
+      <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-md); padding: 14px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+        <i class="fa-solid fa-seedling" style="color: var(--primary-400); font-size: 1.4rem;"></i>
+        <div style="font-size: 0.85rem; color: #d1fae5;">
+          <strong>Earn Eco-Points:</strong> Submitting a verified report will earn you between <strong>20 to 50 Eco-Points</strong> once addressed by green marshals!
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+        <i class="fa-solid fa-paper-plane"></i> Submit Waste Report
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

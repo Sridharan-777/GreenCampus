@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}My Submitted Waste Reports - GreenCampus{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+  <div>
+    <h1 style="font-size: 2rem;">My Waste Reports</h1>
+    <p style="color: var(--text-muted);">Track status and verification points of your submitted reports</p>
+  </div>
+  <a href="{% url 'report_create' %}" class="btn btn-primary">
+    <i class="fa-solid fa-plus"></i> Submit New Report
+  </a>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+  {% if reports %}
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+      <thead>
+        <tr style="background: rgba(11, 19, 21, 0.8); border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+          <th style="padding: 16px 20px;">Report</th>
+          <th style="padding: 16px 20px;">Category</th>
+          <th style="padding: 16px 20px;">Location</th>
+          <th style="padding: 16px 20px;">Status</th>
+          <th style="padding: 16px 20px;">Points Earned</th>
+          <th style="padding: 16px 20px;">Date</th>
+          <th style="padding: 16px 20px; text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reports %}
+          <tr style="border-bottom: 1px solid var(--border-subtle);">
+            <td style="padding: 16px 20px;">
+              <strong style="color: #fff;"><a href="{% url 'report_detail' report.pk %}">{{ report.title }}</a></strong>
+            </td>
+            <td style="padding: 16px 20px;">
+              <span class="badge" style="background: {{ report.category.badge_color }}33; color: {{ report.category.badge_color }};">
+                {{ report.category.name|default:"General" }}
+              </span>
+            </td>
+            <td style="padding: 16px 20px; color: var(--text-muted);">{{ report.location_name }}</td>
+            <td style="padding: 16px 20px;">
+              <span class="badge badge-{{ report.status }}">{{ report.get_status_display }}</span>
+            </td>
+            <td style="padding: 16px 20px; font-weight: 700; color: {% if report.points_awarded > 0 %}#34d399{% else %}var(--text-dim){% endif %};">
+              +{{ report.points_awarded }} pts
+            </td>
+            <td style="padding: 16px 20px; color: var(--text-dim); font-size: 0.85rem;">{{ report.created_at|date:"M d, Y" }}</td>
+            <td style="padding: 16px 20px; text-align: right;">
+              <a href="{% url 'report_detail' report.pk %}" class="btn btn-secondary btn-sm">View</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div style="text-align: center; padding: 48px 20px;">
+      <i class="fa-solid fa-camera fa-3x" style="color: var(--text-dim); margin-bottom: 16px;"></i>
+      <h3>No reports submitted yet</h3>
+      <p style="color: var(--text-muted); margin-bottom: 20px;">Found trash or overflowing bins on campus? Submit a photo report and earn points!</p>
+      <a href="{% url 'report_create' %}" class="btn btn-primary">Report Waste Now</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

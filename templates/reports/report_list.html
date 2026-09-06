@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Campus Waste Reports - GreenCampus{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+  <div>
+    <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary-400); text-transform: uppercase;">Module 1 • Waste Management</div>
+    <h1 style="font-size: 2.2rem; margin-top: 4px;">Campus Waste & Recycling Reports</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Track, view and resolve reported waste incidents across university zones</p>
+  </div>
+  <a href="{% url 'report_create' %}" class="btn btn-primary btn-lg">
+    <i class="fa-solid fa-camera"></i> Snap & Report Waste
+  </a>
+</div>
+
+<!-- Quick Statistics Bar -->
+<div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 28px;">
+  <div class="metric-card">
+    <div class="metric-icon"><i class="fa-solid fa-trash-can"></i></div>
+    <div>
+      <div class="metric-value">{{ total_count }}</div>
+      <div class="metric-label">Total Reports</div>
+    </div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon" style="color: #fbbf24; background: rgba(245, 158, 11, 0.15);"><i class="fa-solid fa-clock"></i></div>
+    <div>
+      <div class="metric-value">{{ pending_count }}</div>
+      <div class="metric-label">Pending Action</div>
+    </div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon" style="color: #34d399; background: rgba(16, 185, 129, 0.15);"><i class="fa-solid fa-circle-check"></i></div>
+    <div>
+      <div class="metric-value">{{ cleaned_count }}</div>
+      <div class="metric-label">Cleaned & Resolved</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters and Search Bar -->
+<div class="card" style="margin-bottom: 28px; padding: 18px 24px;">
+  <form method="GET" style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+    
+    <!-- Search Query -->
+    <div style="flex: 1; min-width: 240px; position: relative;">
+      <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+      <input type="text" name="q" value="{{ search_query|default:'' }}" class="form-input" placeholder="Search by location, keyword..." style="padding-left: 40px;">
+    </div>
+
+    <!-- Category Dropdown -->
+    <div style="min-width: 180px;">
+      <select name="category" class="form-select" onchange="this.form.submit()">
+        <option value="">All Waste Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Status Dropdown -->
+    <div style="min-width: 180px;">
+      <select name="status" class="form-select" onchange="this.form.submit()">
+        <option value="">All Statuses</option>
+        <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>Pending Review</option>
+        <option value="in_progress" {% if selected_status == 'in_progress' %}selected{% endif %}>In Progress</option>
+        <option value="cleaned" {% if selected_status == 'cleaned' %}selected{% endif %}>Cleaned & Resolved</option>
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-secondary">
+      <i class="fa-solid fa-filter"></i> Apply
+    </button>
+    {% if selected_category or selected_status or search_query %}
+      <a href="{% url 'report_list' %}" class="btn btn-danger btn-sm" title="Clear Filters">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Reports Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
+  {% for report in reports %}
+    <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+      <!-- Image Thumbnail -->
+      <div style="position: relative; height: 180px; width: 100%; background: #111e21;">
+        {% if report.image %}
+          <img src="{{ report.image.url }}" alt="{{ report.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+        {% else %}
+          <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-dim);">
+            <i class="fa-solid fa-image fa-3x"></i>
+          </div>
+        {% endif %}
+        
+        <!-- Status & Category Badges on Image -->
+        <div style="position: absolute; top: 12px; left: 12px; display: flex; gap: 8px;">
+          <span class="badge badge-{{ report.status }}">{{ report.get_status_display }}</span>
+          {% if report.category %}
+            <span class="badge" style="background: {{ report.category.badge_color }}33; color: {{ report.category.badge_color }}; border: 1px solid {{ report.category.badge_color }}66;">
+              {{ report.category.name }}
+            </span>
+          {% endif %}
+        </div>
+
+        <div style="position: absolute; bottom: 10px; right: 12px;">
+          <span class="badge badge-urgency-{{ report.urgency }}">Urgency: {{ report.get_urgency_display }}</span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <h3 style="font-size: 1.15rem; margin-bottom: 8px;">
+            <a href="{% url 'report_detail' report.pk %}" style="color: #fff;">{{ report.title }}</a>
+          </h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">
+            <i class="fa-solid fa-location-dot" style="color: var(--primary-400); margin-right: 4px;"></i> {{ report.location_name }}
+          </p>
+          <p style="color: var(--text-dim); font-size: 0.85rem; line-height: 1.5; margin-bottom: 16px;">
+            {{ report.description|truncatewords:15|default:"No further details provided." }}
+          </p>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted);">
+          <span><i class="fa-solid fa-user-pen"></i> @{{ report.reported_by.username }}</span>
+          <span><i class="fa-solid fa-weight-hanging"></i> ~{{ report.estimated_weight_kg }} kg</span>
+        </div>
+
+        <a href="{% url 'report_detail' report.pk %}" class="btn btn-outline-primary btn-sm" style="margin-top: 14px; width: 100%;">
+          View Details & Verification <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  {% empty %}
+    <div style="grid-column: 1 / -1; text-align: center; padding: 64px 0;">
+      <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 1.8rem; color: var(--text-dim);">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+      <h3 style="font-size: 1.3rem;">No waste reports found</h3>
+      <p style="color: var(--text-muted); margin-top: 4px;">Try modifying your search or filter options, or submit a new report.</p>
+      <a href="{% url 'report_create' %}" class="btn btn-primary" style="margin-top: 16px;">
+        <i class="fa-solid fa-plus"></i> Create Report
+      </a>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.title }} - GreenCampus{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+  <a href="{% url 'event_list' %}" style="color: var(--text-muted); font-size: 0.9rem;">
+    <i class="fa-solid fa-arrow-left"></i> Back to Campaigns
+  </a>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: start;">
+  
+  <!-- Left Column: Banner & Event Info -->
+  <div style="display: flex; flex-direction: column; gap: 24px;">
+    
+    <div class="card" style="padding: 0; overflow: hidden;">
+      {% if event.banner_image %}
+        <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" style="width: 100%; max-height: 380px; object-fit: cover;">
+      {% else %}
+        <div style="height: 240px; width: 100%; background: linear-gradient(135deg, rgba(5, 150, 105, 0.4), rgba(6, 182, 212, 0.4)); display: flex; align-items: center; justify-content: center; color: #fff;">
+          <i class="fa-solid fa-people-carry-box fa-4x"></i>
+        </div>
+      {% endif %}
+
+      <div style="padding: 28px;">
+        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+          <span class="badge" style="background: rgba(11, 19, 21, 0.85); color: #fff; border: 1px solid var(--border-subtle);">
+            {{ event.get_status_display }}
+          </span>
+          {% if event.category %}
+            <span class="badge" style="background: {{ event.category.color }}33; color: {{ event.category.color }}; border: 1px solid {{ event.category.color }}66;">
+              {{ event.category.name }}
+            </span>
+          {% endif %}
+        </div>
+
+        <h1 style="font-size: 2rem; margin-bottom: 14px;">{{ event.title }}</h1>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle);">
+          <div><i class="fa-solid fa-calendar-day" style="color: var(--primary-400); margin-right: 6px;"></i> {{ event.start_date|date:"D, M d, Y" }}</div>
+          <div><i class="fa-solid fa-clock" style="color: var(--primary-400); margin-right: 6px;"></i> {{ event.start_date|date:"g:i A" }} - {{ event.end_date|date:"g:i A" }}</div>
+          <div><i class="fa-solid fa-location-dot" style="color: var(--accent-cyan); margin-right: 6px;"></i> {{ event.location }}</div>
+        </div>
+
+        <h3 style="font-size: 1.2rem; margin-bottom: 10px;">About this Campaign</h3>
+        <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.7; white-space: pre-line;">
+          {{ event.description }}
+        </p>
+
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">
+            Organized by: <strong style="color: #fff;">@{{ event.organizer.username }}</strong>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Registered Volunteers List -->
+    <div class="card">
+      <div class="card-header">
+        <h3 style="font-size: 1.2rem;"><i class="fa-solid fa-users" style="color: var(--primary-400); margin-right: 8px;"></i> Registered Volunteers ({{ event.rsvp_count }})</h3>
+      </div>
+
+      {% if active_rsvps %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;">
+          {% for rsvp in active_rsvps %}
+            <div style="background: rgba(11, 19, 21, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--primary-800); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff;">
+                  {{ rsvp.user.username|first|upper }}
+                </div>
+                <div>
+                  <strong style="color: #fff; font-size: 0.85rem; display: block;">@{{ rsvp.user.username }}</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">{{ rsvp.volunteer_role }}</span>
+                </div>
+              </div>
+
+              <!-- Organizer Attendance Verification Action -->
+              {% if is_organizer %}
+                {% if rsvp.status == 'attended' %}
+                  <span class="badge badge-cleaned" style="font-size: 0.7rem;"><i class="fa-solid fa-check"></i> Attended</span>
+                {% else %}
+                  <a href="{% url 'event_attend' event.pk rsvp.user.id %}" class="btn btn-outline-primary btn-sm" style="font-size: 0.75rem;" title="Confirm attendance and award points">
+                    Award
+                  </a>
+                {% endif %}
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="color: var(--text-muted); text-align: center; padding: 24px 0;">Be the first volunteer to join this green campaign!</p>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Right Column: RSVP Box & Campaign Metrics -->
+  <div style="display: flex; flex-direction: column; gap: 24px;">
+    
+    <!-- Join / RSVP Card -->
+    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.35);">
+      <h3 style="font-size: 1.25rem; margin-bottom: 16px;">Volunteer Registration</h3>
+      
+      <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: var(--radius-md); padding: 14px; margin-bottom: 20px; text-align: center;">
+        <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Participation Reward</div>
+        <div style="font-size: 1.8rem; font-weight: 800; font-family: 'Outfit'; color: var(--primary-300);">+{{ event.eco_points_reward }} pts</div>
+      </div>
+
+      <!-- Volunteer Progress -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px;">
+          <span>Volunteers Joined</span>
+          <strong>{{ event.rsvp_count }} / {{ event.target_volunteers }}</strong>
+        </div>
+        <div style="width: 100%; height: 10px; background: rgba(255, 255, 255, 0.08); border-radius: 9999px; overflow: hidden;">
+          <div style="width: {{ event.progress_percentage }}%; height: 100%; background: linear-gradient(90deg, var(--primary-500), var(--accent-cyan));"></div>
+        </div>
+      </div>
+
+      {% if user.is_authenticated %}
+        <form method="POST" action="{% url 'event_rsvp' event.pk %}">
+          {% csrf_token %}
+          {% if is_registered %}
+            <div class="alert alert-success" style="font-size: 0.85rem; margin-bottom: 14px;">
+              <i class="fa-solid fa-circle-check"></i> You are registered as a volunteer!
+            </div>
+            <button type="submit" class="btn btn-danger" style="width: 100%;">
+              <i class="fa-solid fa-xmark"></i> Cancel Registration
+            </button>
+          {% else %}
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label class="form-label" style="font-size: 0.85rem;">Preferred Volunteer Role</label>
+              <input type="text" name="volunteer_role" value="Volunteer Participant" class="form-input" placeholder="e.g., Plastic Sorter, Equipment Support">
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+              <i class="fa-solid fa-hand-holding-heart"></i> Join This Drive (+{{ event.eco_points_reward }} pts)
+            </button>
+          {% endif %}
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary" style="width: 100%;">
+          Log in to Join Event
+        </a>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

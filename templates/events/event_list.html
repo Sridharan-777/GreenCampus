@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Green Campaigns & Clean-up Drives - GreenCampus{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+  <div>
+    <div style="font-size: 0.85rem; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase;">Module 2 • Community Action</div>
+    <h1 style="font-size: 2.2rem; margin-top: 4px;">Campaigns & Clean-up Drives</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Join university eco-drives, earn volunteer rewards, and lead campus cleanups</p>
+  </div>
+  <a href="{% url 'event_create' %}" class="btn btn-primary btn-lg">
+    <i class="fa-solid fa-bullhorn"></i> Organize New Campaign
+  </a>
+</div>
+
+<!-- Category & Status Filters -->
+<div class="card" style="margin-bottom: 28px; padding: 18px 24px;">
+  <form method="GET" style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+    <div style="flex: 1; min-width: 240px; position: relative;">
+      <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+      <input type="text" name="q" value="{{ search_query|default:'' }}" class="form-input" placeholder="Search campaign name, location..." style="padding-left: 40px;">
+    </div>
+
+    <div style="min-width: 180px;">
+      <select name="status" class="form-select" onchange="this.form.submit()">
+        <option value="upcoming" {% if selected_status == 'upcoming' %}selected{% endif %}>Upcoming Events</option>
+        <option value="ongoing" {% if selected_status == 'ongoing' %}selected{% endif %}>Ongoing Now</option>
+        <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>Completed Events</option>
+        <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All Events</option>
+      </select>
+    </div>
+
+    <div style="min-width: 180px;">
+      <select name="category" class="form-select" onchange="this.form.submit()">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-filter"></i> Filter</button>
+  </form>
+</div>
+
+<!-- Events Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px;">
+  {% for event in events %}
+    <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+      
+      <!-- Event Banner Image -->
+      <div style="height: 190px; width: 100%; position: relative; background: #111e21;">
+        {% if event.banner_image %}
+          <img src="{{ event.banner_image.url }}" alt="{{ event.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+        {% else %}
+          <div style="width: 100%; height: 100%; background: linear-gradient(135deg, rgba(5, 150, 105, 0.4), rgba(6, 182, 212, 0.4)); display: flex; align-items: center; justify-content: center; color: #fff;">
+            <i class="fa-solid fa-people-group fa-3x"></i>
+          </div>
+        {% endif %}
+
+        <div style="position: absolute; top: 12px; left: 12px; display: flex; gap: 8px;">
+          <span class="badge" style="background: rgba(11, 19, 21, 0.85); color: #fff; border: 1px solid var(--border-subtle);">
+            {{ event.get_status_display }}
+          </span>
+          {% if event.category %}
+            <span class="badge" style="background: {{ event.category.color }}33; color: {{ event.category.color }}; border: 1px solid {{ event.category.color }}66;">
+              {{ event.category.name }}
+            </span>
+          {% endif %}
+        </div>
+
+        <div style="position: absolute; bottom: 12px; right: 12px;">
+          <div class="user-points-pill" style="font-size: 0.8rem; padding: 4px 10px;">
+            <i class="fa-solid fa-award"></i> +{{ event.eco_points_reward }} pts
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Info -->
+      <div style="padding: 22px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="color: var(--primary-400); font-size: 0.85rem; font-weight: 600; margin-bottom: 6px;">
+            <i class="fa-solid fa-calendar-day"></i> {{ event.start_date|date:"D, M d, Y • g:i A" }}
+          </div>
+          <h3 style="font-size: 1.2rem; margin-bottom: 8px;">
+            <a href="{% url 'event_detail' event.pk %}" style="color: #fff;">{{ event.title }}</a>
+          </h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">
+            <i class="fa-solid fa-location-dot" style="color: var(--accent-cyan);"></i> {{ event.location }}
+          </p>
+          <p style="color: var(--text-dim); font-size: 0.85rem; line-height: 1.5; margin-bottom: 16px;">
+            {{ event.description|truncatewords:18 }}
+          </p>
+        </div>
+
+        <div>
+          <!-- Volunteer Target Progress Bar -->
+          <div style="margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">
+              <span>Volunteers Registered: <strong>{{ event.rsvp_count }}</strong></span>
+              <span>Target: {{ event.target_volunteers }}</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 9999px; overflow: hidden;">
+              <div style="width: {{ event.progress_percentage }}%; height: 100%; background: linear-gradient(90deg, var(--primary-500), var(--accent-cyan));"></div>
+            </div>
+          </div>
+
+          <a href="{% url 'event_detail' event.pk %}" class="btn btn-outline-primary btn-sm" style="width: 100%;">
+            View Event & RSVP <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  {% empty %}
+    <div style="grid-column: 1 / -1; text-align: center; padding: 64px 0;">
+      <i class="fa-solid fa-calendar-xmark fa-3x" style="color: var(--text-dim); margin-bottom: 16px;"></i>
+      <h3>No campaigns found for selected filters</h3>
+      <p style="color: var(--text-muted); margin-top: 4px;">Check back soon or start your own sustainability drive!</p>
+      <a href="{% url 'event_create' %}" class="btn btn-primary" style="margin-top: 16px;">Organize Drive</a>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

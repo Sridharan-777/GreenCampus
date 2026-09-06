@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}GreenCampus - University Waste & Sustainability Tracker{% endblock %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+  <!-- Logged-in Personalized Welcome Banner -->
+  <div class="card" style="background: linear-gradient(135deg, rgba(23, 37, 42, 0.95), rgba(6, 78, 59, 0.5)); border: 1px solid rgba(16, 185, 129, 0.4); margin-bottom: 36px; padding: 32px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+          <span class="badge {% if user.profile.role == 'admin' %}badge-urgency-high{% elif user.profile.role == 'marshal' %}badge-in-progress{% else %}badge-cleaned{% endif %}">
+            {{ user.profile.get_role_display }}
+          </span>
+          <span style="font-size: 0.85rem; color: var(--text-muted);">{{ user.profile.department }} • {{ user.profile.hostel_or_block }}</span>
+        </div>
+        <h1 style="font-size: 2.2rem; margin-bottom: 8px;">Welcome back, {{ user.first_name|default:user.username }}! 🌱</h1>
+        <p style="color: #d1fae5; font-size: 1rem; margin: 0;">
+          You currently have <strong>{{ user.profile.eco_points }} Eco-Points</strong> ({{ user.profile.level }}).
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="{% url 'report_create' %}" class="btn btn-primary">
+          <i class="fa-solid fa-camera"></i> Report Waste (+Points)
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+          <i class="fa-solid fa-chart-pie"></i> Open My Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<!-- Hero Section -->
+<div id="about" style="text-align: center; padding: {% if user.is_authenticated %}20px{% else %}48px{% endif %} 0 56px 0; max-width: 880px; margin: 0 auto;">
+  <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); padding: 6px 16px; border-radius: 9999px; margin-bottom: 24px; color: var(--primary-300); font-weight: 600; font-size: 0.9rem;">
+    <i class="fa-solid fa-shield-halved"></i> University Green Initiative • Zero-Waste Campus
+  </div>
+  <h1 style="font-size: 3.2rem; font-weight: 800; line-height: 1.15; margin-bottom: 20px; background: linear-gradient(135deg, #ffffff 30%, var(--primary-300) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+    Transforming Our Campus Into a Smart, Zero-Waste Ecosystem
+  </h1>
+  <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 36px; line-height: 1.6;">
+    An interactive platform for student waste reporting, verified clean-up drives, real-time recycling metrics, and gamified eco-rewards.
+  </p>
+
+  {% if not user.is_authenticated %}
+    <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+      <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-right-to-bracket"></i> Sign In to Campus Portal
+      </a>
+      <a href="{% url 'register' %}" class="btn btn-secondary btn-lg">
+        <i class="fa-solid fa-user-plus"></i> Join as Student Champion
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Campus Roles Section -->
+<div id="roles" style="margin-bottom: 56px;">
+  <div style="text-align: center; margin-bottom: 32px;">
+    <div style="font-size: 0.85rem; font-weight: 700; color: var(--primary-400); text-transform: uppercase;">Role-Based Access</div>
+    <h2 style="font-size: 2rem; margin-top: 4px;">Tailored Experiences For Every Role</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Log in to unlock your personalized role dashboard and tools</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+    <!-- Role 1: Student -->
+    <div class="card" style="border-top: 4px solid #10b981;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="width: 48px; height: 48px; background: rgba(16, 185, 129, 0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #34d399; font-size: 1.3rem;">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <span class="badge badge-cleaned">Student Champion</span>
+      </div>
+      <h3 style="font-size: 1.25rem; margin-bottom: 10px;">Students & Hostelites</h3>
+      <ul style="list-style: none; padding: 0; color: var(--text-muted); font-size: 0.9rem; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+        <li><i class="fa-solid fa-check" style="color: var(--primary-400); margin-right: 8px;"></i> Snap & report waste with location tags</li>
+        <li><i class="fa-solid fa-check" style="color: var(--primary-400); margin-right: 8px;"></i> RSVP & volunteer in clean-up drives</li>
+        <li><i class="fa-solid fa-check" style="color: var(--primary-400); margin-right: 8px;"></i> Earn Eco-Points & unlock badges</li>
+        <li><i class="fa-solid fa-check" style="color: var(--primary-400); margin-right: 8px;"></i> Redeem dining vouchers & prizes</li>
+      </ul>
+      {% if not user.is_authenticated %}
+        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm" style="width: 100%;">Log in as Student</a>
+      {% endif %}
+    </div>
+
+    <!-- Role 2: Green Marshal / Staff -->
+    <div class="card" style="border-top: 4px solid #3b82f6;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="width: 48px; height: 48px; background: rgba(59, 130, 246, 0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 1.3rem;">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <span class="badge badge-in-progress">Green Marshal</span>
+      </div>
+      <h3 style="font-size: 1.25rem; margin-bottom: 10px;">Staff & Marshals</h3>
+      <ul style="list-style: none; padding: 0; color: var(--text-muted); font-size: 0.9rem; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+        <li><i class="fa-solid fa-check" style="color: #60a5fa; margin-right: 8px;"></i> Review student waste incident reports</li>
+        <li><i class="fa-solid fa-check" style="color: #60a5fa; margin-right: 8px;"></i> Upload clean-up proof & resolve tickets</li>
+        <li><i class="fa-solid fa-check" style="color: #60a5fa; margin-right: 8px;"></i> Award Eco-Points to verified reports</li>
+        <li><i class="fa-solid fa-check" style="color: #60a5fa; margin-right: 8px;"></i> Confirm event volunteer attendance</li>
+      </ul>
+      {% if not user.is_authenticated %}
+        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm" style="width: 100%; color: #60a5fa; border-color: #60a5fa;">Log in as Staff</a>
+      {% endif %}
+    </div>
+
+    <!-- Role 3: Sustainability Admin -->
+    <div class="card" style="border-top: 4px solid #f59e0b;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="width: 48px; height: 48px; background: rgba(245, 158, 11, 0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.3rem;">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <span class="badge badge-pending">Campus Admin</span>
+      </div>
+      <h3 style="font-size: 1.25rem; margin-bottom: 10px;">Sustainability Cell</h3>
+      <ul style="list-style: none; padding: 0; color: var(--text-muted); font-size: 0.9rem; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+        <li><i class="fa-solid fa-check" style="color: #fbbf24; margin-right: 8px;"></i> Campus-wide recycling & CO₂ analytics</li>
+        <li><i class="fa-solid fa-check" style="color: #fbbf24; margin-right: 8px;"></i> Launch official campaigns & rallies</li>
+        <li><i class="fa-solid fa-check" style="color: #fbbf24; margin-right: 8px;"></i> Manage rewards store inventory</li>
+        <li><i class="fa-solid fa-check" style="color: #fbbf24; margin-right: 8px;"></i> Full Django admin access (`/admin/`)</li>
+      </ul>
+      {% if not user.is_authenticated %}
+        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm" style="width: 100%; color: #fbbf24; border-color: #fbbf24;">Admin Sign In</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- 3 Core Modules Showcase -->
+<div id="modules" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-bottom: 56px;">
+  <!-- Module 1 -->
+  <div class="card">
+    <span style="font-size: 0.8rem; font-weight: 700; color: #34d399; text-transform: uppercase;">Module 1 • Member 1</span>
+    <h3 style="font-size: 1.3rem; margin: 8px 0;">Waste Reporting & Photo Evidence</h3>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;">
+      Empower students to report unsegregated waste with real-time photo uploads, GPS zone tags, and marshal verification.
+    </p>
+    <a href="{% url 'report_list' %}" style="font-weight: 600; font-size: 0.9rem;">
+      {% if user.is_authenticated %}Open Waste Reports <i class="fa-solid fa-arrow-right"></i>{% else %}Sign In to View Reports <i class="fa-solid fa-lock"></i>{% endif %}
+    </a>
+  </div>
+
+  <!-- Module 2 -->
+  <div class="card">
+    <span style="font-size: 0.8rem; font-weight: 700; color: #60a5fa; text-transform: uppercase;">Module 2 • Member 2</span>
+    <h3 style="font-size: 1.3rem; margin: 8px 0;">Campaigns & Clean-up Drives</h3>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;">
+      Organize and volunteer in green campaigns, e-waste drives, and tree planting rallies with volunteer progress tracking.
+    </p>
+    <a href="{% url 'event_list' %}" style="font-weight: 600; font-size: 0.9rem; color: #60a5fa;">
+      {% if user.is_authenticated %}Explore Campaigns <i class="fa-solid fa-arrow-right"></i>{% else %}Sign In to Explore Drives <i class="fa-solid fa-lock"></i>{% endif %}
+    </a>
+  </div>
+
+  <!-- Module 3 -->
+  <div class="card">
+    <span style="font-size: 0.8rem; font-weight: 700; color: #fbbf24; text-transform: uppercase;">Module 3 • Member 3</span>
+    <h3 style="font-size: 1.3rem; margin: 8px 0;">Analytics & Gamified Rewards</h3>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;">
+      Real-time Chart.js graphs for waste categories, CO₂ reduction counters, live student leaderboard, and rewards store.
+    </p>
+    <a href="{% url 'leaderboard' %}" style="font-weight: 600; font-size: 0.9rem; color: #fbbf24;">
+      {% if user.is_authenticated %}View Live Leaderboard <i class="fa-solid fa-arrow-right"></i>{% else %}Sign In for Leaderboard <i class="fa-solid fa-lock"></i>{% endif %}
+    </a>
+  </div>
+</div>
+
+{% endblock %}

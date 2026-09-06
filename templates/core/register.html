@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Create an Account - GreenCampus{% endblock %}
+
+{% block content %}
+<div style="max-width: 580px; margin: 32px auto;">
+  <div class="card" style="box-shadow: var(--shadow-lg);">
+    <div style="text-align: center; margin-bottom: 28px;">
+      <div class="brand-icon" style="margin: 0 auto 16px auto; width: 48px; height: 48px; font-size: 1.4rem;">
+        <i class="fa-solid fa-seedling"></i>
+      </div>
+      <h2 style="font-size: 1.6rem; margin-bottom: 6px;">Join the Green Revolution</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Sign up to get <strong>+50 Welcome Eco-Points</strong> and start reporting waste!</p>
+    </div>
+
+    <form method="POST" action="{% url 'register' %}">
+      {% csrf_token %}
+
+      {% if form.errors %}
+        <div class="alert alert-error" style="margin-bottom: 20px;">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <div>{{ field.label }}: {{ error }}</div>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <div>{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          {{ form.first_name }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          {{ form.last_name }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Username *</label>
+        {{ form.username }}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Campus Email *</label>
+        {{ form.email }}
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label">Campus Role *</label>
+          {{ form.role }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Department / Branch</label>
+          {{ form.department }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Hostel / Campus Block</label>
+        {{ form.hostel_or_block }}
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          {{ form.password }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password *</label>
+          {{ form.confirm_password }}
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">
+        <i class="fa-solid fa-user-plus"></i> Create Green Account
+      </button>
+    </form>
+
+    <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-subtle); font-size: 0.9rem; color: var(--text-muted);">
+      Already have an account? 
+      <a href="{% url 'login' %}" style="font-weight: 600; color: var(--primary-400);">Log In</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
